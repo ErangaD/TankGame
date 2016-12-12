@@ -5,12 +5,14 @@ using System;
 
 public class RequestSender : MonoBehaviour {
 
-    public static void sendRequests(string message)
+    private string message = "JOIN#";
+    private void Start()
     {
         try
         {
             using (var client = new System.Net.Sockets.TcpClient("127.0.0.1", 6000))
             {
+                Debug.Log("Join Sent");
                 var byteData = Encoding.ASCII.GetBytes(message);
                 client.GetStream().Write(byteData, 0, byteData.Length);
             }
@@ -21,4 +23,5 @@ public class RequestSender : MonoBehaviour {
             Debug.Break();
         }
     }
+    
 }

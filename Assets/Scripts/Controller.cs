@@ -8,9 +8,9 @@ public class Controller : MonoBehaviour {
     void Start()
     {
         
-        RequestSender.sendRequests("JOIN#");
-        Thread oThread = new Thread(new ThreadStart(InputTaker.Connect));
-        oThread.Start();
+        
+        
+        
         
         //InputTaker.Connect();
 

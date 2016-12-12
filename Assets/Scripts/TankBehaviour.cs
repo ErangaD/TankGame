@@ -29,6 +29,8 @@ public class TankBehaviour : MonoBehaviour
     public Mesh mesh;
     public Material material;
 
+    private bool colided;
+
 
     void Start()
     {
@@ -167,4 +169,5 @@ public class TankBehaviour : MonoBehaviour
         isMoving = false;
         yield return 0;
     }
+   
 }

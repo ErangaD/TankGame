@@ -4,8 +4,10 @@ using System.Collections;
 public class EnemyTank : MonoBehaviour {
 
     public Transform enemyObj;
-	// Use this for initialization
-	void Start () {
+    
+
+    // Use this for initialization
+    void Start () {
         
             
         Instantiate(enemyObj, new Vector3(0.5f, 0.5f+1, 0), Quaternion.identity);

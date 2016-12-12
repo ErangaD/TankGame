@@ -71,6 +71,9 @@
     <Compile Include="Assets\Scripts\InputTaker.cs" />
     <Compile Include="Assets\Scripts\RequestSender.cs" />
     <Compile Include="Assets\Scripts\TankBehaviour.cs" />
+    <Compile Include="Assets\Scripts\TankListner.cs" />
+    <Compile Include="Assets\Scripts\TestingScript.cs" />
+    <Compile Include="Assets\Scripts\serverListener.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
