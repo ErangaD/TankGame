@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
+
 using System.Text;
 using System.IO;
 using System.Threading;
@@ -25,19 +25,53 @@ public class InputTaker : MonoBehaviour {
     private List<Vector3> healthList = new List<Vector3>();
     private List<float> healtTime = new List<float>();
     private List<string> damageDetails = new List<string>();
-    private bool boardSet , locatedTank,isCreated;
+    private List<Player> players = new List<Player>();
+    private bool boardSet , locatedTank,isCreated,changeHappened;
     Quaternion originalRot;
-    Thread oThread;
+    Thread oThread,oThread1;
     Vector3 tankLocation;
     string myTankName;
+    private System.Object thisLock = new System.Object();
     void Start()
     {
         originalRot = transform.rotation;
         oThread = new Thread(takeInput);
         oThread.Start();
+        oThread1 = new Thread(enemyCreations);
+        oThread1.Start();
         Debug.Log("Thread started");
         this.boardSet = true;
         this.locatedTank = true;
+    }
+    void addEnemies()
+    {
+        lock (thisLock)
+        {
+            players.Clear();
+        }
+    }
+
+    void enemyCreations()
+    {
+        while (true)
+        {
+            if (changeHappened)
+            {
+                lock (thisLock)
+                {
+                    foreach (Player x in players)
+                    {
+                        //instanitiating players
+                    }
+                }
+
+            }else
+            {
+                Thread.Sleep(500);
+            }
+        }
+        
+        
     }
     void takeInput()
     {
@@ -131,8 +165,12 @@ public class InputTaker : MonoBehaviour {
                 }else if (dType.Equals("G"))
                 {
                     int lengthOfArray = dataArray.Length;
-                    
-                    for(int i = 1; i < lengthOfArray - 1; i++)
+                    string[] damages = dataArray[lengthOfArray - 1].Split(';');
+                    int damagesLength = damages.Length;
+                    string lastDamage = damages[damagesLength - 1];
+                    addEnemies();
+                    damages[damagesLength - 1] = lastDamage.Substring(0, lastDamage.Length - 1);
+                    for (int i = 1; i < lengthOfArray - 1; i++)
                     {
                         string[] playerDetails = dataArray[i].Split(';');
                         string playerName = playerDetails[0];
@@ -142,8 +180,15 @@ public class InputTaker : MonoBehaviour {
                         int direction = int.Parse(playerDetails[2]);
                         string shotedStatus = playerDetails[3];
                         int health = int.Parse(playerDetails[4]);
+                        int coins = int.Parse(playerDetails[5]);
+                        int points = int.Parse(playerDetails[6]);
+                        Player c = new Player(name, xCordintes, yCordinates, direction,
+                            health, coins, points,damages[i-1]);
+                        players.Add(c);
+
                     }
-                    string[] damages = dataArray[lengthOfArray - 1].Split(';');
+                    changeHappened = true;
+                    
                     
                 }
            }
@@ -211,6 +256,7 @@ public class InputTaker : MonoBehaviour {
             healthList.RemoveAt(0);
             healtTime.RemoveAt(0);
         }
+        
    }
 
     

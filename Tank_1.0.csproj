@@ -69,6 +69,7 @@
     <Compile Include="Assets\Scripts\Controller.cs" />
     <Compile Include="Assets\Scripts\EnemyTank.cs" />
     <Compile Include="Assets\Scripts\InputTaker.cs" />
+    <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\RequestSender.cs" />
     <Compile Include="Assets\Scripts\TankBehaviour.cs" />
     <Compile Include="Assets\Scripts\TankListner.cs" />
