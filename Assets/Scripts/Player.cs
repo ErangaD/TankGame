@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : MonoBehaviour {
+public class Player {
     
     public string Player_name;
     public int locationX, locationY,direction;
@@ -13,7 +13,7 @@ public class Player : MonoBehaviour {
     public Player(string name,int locationX,int locationY,int direction,int health,int coins,int point,
         string damage) 
     {
-        Debug.Log("I am inside the Player");
+        
         this.Player_name = name;
         this.locationX = locationX;
         this.locationY = locationY;

@@ -9,7 +9,7 @@ using System.Collections;
 
 public class InputTaker : MonoBehaviour {
 
-
+    public GameObject map;
     public GameObject enemy1;
     public GameObject rocks;
     public GameObject wall;
@@ -25,8 +25,11 @@ public class InputTaker : MonoBehaviour {
     private List<float> coinTime = new List<float>();
     private List<Vector3> healthList = new List<Vector3>();
     private List<float> healtTime = new List<float>();
+
+    //for the view update purpose
     private List<string> damageDetails = new List<string>();
-    private List<string[]> players = new List<string[]>();
+    
+    private List<Player> players = new List<Player>();
     private List<GameObject> playersInst = new List<GameObject>();
     private bool boardSet , locatedTank,isCreated,changeHappened;
     Quaternion originalRot;
@@ -41,11 +44,18 @@ public class InputTaker : MonoBehaviour {
     {
         originalRot = transform.rotation;
         oThread = new Thread(takeInput);
+        oThread.IsBackground = true;    
         oThread.Start();
-        
+        var instantiatedPrefab =Instantiate(map, new Vector3( 4.5f,-4.5f,0), originalRot) as GameObject;
+        //for 20*20 9.5 and -9.5
+        instantiatedPrefab.transform.localScale = new Vector3(4.05f, 4.9f,0);
+        //for 20*20 8.06 and 9.70
+        AICalculation.levels = 10;
+        AICalculation.cubes = 10;
         Debug.Log("Thread started");
         this.boardSet = true;
         this.locatedTank = true;
+
     }
     void addEnemies()
     {
@@ -67,32 +77,36 @@ public class InputTaker : MonoBehaviour {
                     {
                         Destroy(x);
                     }
+                    
                     playersInst.Clear();
-                    foreach (string[] x in players)
+                    Debug.Log("Cleared the palyerInst");
+                    foreach (Player x in players)
                     {
-                        
-                        int xPosition = int.Parse(x[1]);
-                        int yPosition = int.Parse(x[2]);
-                        Quaternion localRotation=originalRot;
+
+                        int xPosition = x.locationX;
+                        int yPosition = -x.locationY;
+                        Quaternion localRotation= Quaternion.Euler(0, 90, 0); ;
                         Vector3 d = new Vector3(xPosition, yPosition, 0);
-                        int rotation = int.Parse(x[3]);
+                        int rotation = x.direction;
+                        Debug.Log(rotation+""+xPosition+""+yPosition);
                         switch (rotation)
                         {
                             case 1:
-                                localRotation = Quaternion.Euler(0, 90, 0);
+                                localRotation = Quaternion.Euler(0, 0, -90);
+                                Debug.Log("Direction changed");
                                 break;
                             case 2:
-                                localRotation = Quaternion.Euler(0, 180, 0);
+                                localRotation = Quaternion.Euler(0, 0, 180);
                                 break;
                             case 3:
-                                localRotation = Quaternion.Euler(0, 270, 0);
+                                localRotation = Quaternion.Euler(0, 0, 90);
                                 break;
                         }
-                        string objName = x[0];
-                        if (objName.Equals(myTank))
+                        string objName = x.Player_name;
+                        if (objName.Equals(myTankName))
                         {
+                            Debug.Log("In my TankName");
                             playersInst.Add((GameObject)Instantiate(myTank, d, localRotation));
-                            
                         }
                         else
                         {
@@ -111,7 +125,10 @@ public class InputTaker : MonoBehaviour {
         
         
     }
-    
+    void createGridForCalc()
+    {
+        AICalculation.createTheFrame();
+    }
     void takeInput()
     {
         System.Net.Sockets.TcpListener clientServer = null;
@@ -119,7 +136,6 @@ public class InputTaker : MonoBehaviour {
         {
             var port = 7000;
             var address = System.Net.IPAddress.Parse("127.0.0.1");
-            //Debug.Log("Threadswd in");
             clientServer = new System.Net.Sockets.TcpListener(address, port);
 
             clientServer.Start();
@@ -145,22 +161,56 @@ public class InputTaker : MonoBehaviour {
 
                 String[] dataArray = inputStr.Split(':');
                 String dType = dataArray[0];
-                if (dType.Equals("I"))
+
+                if (dType.Equals("G"))
+                {
+                    int lengthOfArray = dataArray.Length;
+                    string[] damages = dataArray[lengthOfArray - 1].Split(';');
+                    int damagesLength = damages.Length;
+                    string lastDamage = damages[damagesLength - 1];
+                    addEnemies();
+                    damages[damagesLength - 1] = lastDamage.Substring(0, lastDamage.Length - 1);
+                    for (int i = 1; i < lengthOfArray - 1; i++)
+                    {
+                        string[] playerDetails = dataArray[i].Split(';');
+                        string playerName = playerDetails[0];
+                        string[] locations = playerDetails[1].Split(',');
+                        int xCordintes = int.Parse(locations[0]);
+                        int yCordinates = int.Parse(locations[1]);
+                        int direction = int.Parse(playerDetails[2]);
+                        string shotedStatus = playerDetails[3];
+                        int health = int.Parse(playerDetails[4]);
+                        int coins = int.Parse(playerDetails[5]);
+                        int points = int.Parse(playerDetails[6]);
+                        Player c1 = new Player(playerName, xCordintes, yCordinates, direction, health,
+                            coins, points, damages[i - 1]);
+                        players.Add(c1);
+                    }
+                    AICalculation.players = new List<Player>(this.players);
+                    AICalculation.changed = true;
+                    changeHappened = true;
+
+
+                }
+                else if (dType.Equals("I"))
                 {
                     
                     Debug.Log("Map Data is received");
-
+                    //myTankName = dataArray[1];
                     String brickCordinates = dataArray[2];
                     wallList = getVecotors(brickCordinates);
-                    
+                    AICalculation.wallList = this.wallList;
                     String stoneCordinates = dataArray[3];
                     rockList = getVecotors(stoneCordinates);
-
+                    AICalculation.rockList = this.rockList;
                     String waterCordinates = dataArray[4].Trim();                    
                     waterCordinates = waterCordinates.Substring(0, waterCordinates.Length - 1);                   
-                    waterList = getVecotors(waterCordinates);                    
+                    waterList = getVecotors(waterCordinates);
+                    AICalculation.waterList = this.waterList;                
                     this.boardSet = false;
-                    
+                    //no clarification yet for using a seperate thread
+                    Thread r = new Thread(createGridForCalc);
+                    r.Start();
 
                 }else if (dType.Equals("S")){
                     //Game has started
@@ -176,9 +226,10 @@ public class InputTaker : MonoBehaviour {
                     string direction = withSemiColone[2];
                     int directionInt= int.Parse(direction.Substring(0, direction.Length - 1));
                     Debug.Log("before vector");
-                    tankLocation= new Vector3(locationX, -(locationY), 0);
+                    tankLocation= new Vector3(locationX, - (locationY), 0);
                     locatedTank = false;
                     Debug.Log("Set the position of Tank");
+                    AICalculation.myTank = myTankName;
                 }
                 else if (dType.Equals("C"))
                 {
@@ -201,44 +252,6 @@ public class InputTaker : MonoBehaviour {
                     int yPosition = Int32.Parse(lifePacks[1]);
                     healthList.Add(new Vector3(xPosition, -(yPosition), 0));
                     healtTime.Add(timeIntMedi);
-                }else if (dType.Equals("G"))
-                {
-                    int lengthOfArray = dataArray.Length;
-                    string[] damages = dataArray[lengthOfArray - 1].Split(';');
-                    int damagesLength = damages.Length;
-                    string lastDamage = damages[damagesLength - 1];
-                    addEnemies();
-                    damages[damagesLength - 1] = lastDamage.Substring(0, lastDamage.Length - 1);
-                    for (int i = 1; i < lengthOfArray - 1; i++)
-                    {
-                        string[] playerDetails = dataArray[i].Split(';');
-                        string playerName = playerDetails[0];
-                        string[] locations = playerDetails[1].Split(',');
-                        string xCordintes = (locations[0]);
-                        string yCordinates = (locations[1]);
-                        string direction = (playerDetails[2]);
-                        string shotedStatus = playerDetails[3];
-                        string health  = (playerDetails[4]);
-                        string coins = (playerDetails[5]);
-                        string points = (playerDetails[6]);
-                        //Player c = new Player(name, xCordintes, yCordinates, direction,health, coins, points,damages[i-1]);
-                        //players.Add(c);
-                        string[] c = new string[8];
-                        c[0] = playerName;
-                        c[1] = xCordintes;
-                        c[2] = yCordinates;
-                        c[3] = direction;
-                        c[4] = health;
-                        c[5] = coins;
-                        c[6] = points;
-                        c[7] = damages[i - 1];
-                        players.Add(c);
-                        
-
-                    }
-                    changeHappened = true;
-                    
-                    
                 }
            }
         }
@@ -252,11 +265,9 @@ public class InputTaker : MonoBehaviour {
     {
 
         enemyCreations();
-        Debug.Log(boardSet);
-
+        //Debug.Log(boardSet);
         if (boardSet==false)
         {
-            Debug.Log("In Update finished");
 
             foreach (Vector3 vec in wallList)
             {
@@ -271,14 +282,14 @@ public class InputTaker : MonoBehaviour {
                 Instantiate(water, vec, originalRot);
             }
             boardSet = true;
-            Debug.Log("Map Update finished");
+            //Debug.Log("Map Update finished");
         }
         if (locatedTank == false)
         {
             if (!isCreated)
             {
                 
-                Instantiate(myTank, tankLocation, originalRot);
+                playersInst.Add((GameObject)Instantiate(myTank, tankLocation, originalRot));
                 
                 isCreated = true;
                 Debug.Log("Tank is initiated");
@@ -294,19 +305,19 @@ public class InputTaker : MonoBehaviour {
         }
         if (coinList.Count != 0)
         {
-            Debug.Log("Going to inite");
-            GameObject instantiated = (GameObject)Instantiate(coins, coinList[0], originalRot);
-            Destroy(instantiated,coinTime[0]);
+            
+            Destroy((GameObject)Instantiate(coins, coinList[0], originalRot), coinTime[0]);
             coinList.RemoveAt(0);
             coinTime.RemoveAt(0);
+            Debug.Log("Coins were initialized");
         }
         if (healthList.Count != 0)
         {
-            Debug.Log("Creating Life Objects");
-            GameObject instantiated = (GameObject)Instantiate(health, healthList[0], originalRot);
-            Destroy(instantiated, healtTime[0]);
+            
+            Destroy((GameObject)Instantiate(health, healthList[0], originalRot), healtTime[0]);
             healthList.RemoveAt(0);
             healtTime.RemoveAt(0);
+            Debug.Log("Life Objects initialized");
         }
         
    }
