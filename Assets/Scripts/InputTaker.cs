@@ -25,10 +25,10 @@ public class InputTaker : MonoBehaviour {
     private List<float> coinTime = new List<float>();
     private List<Vector3> healthList = new List<Vector3>();
     private List<float> healtTime = new List<float>();
-
+    private volatile List<int[]> walldet=new List<int[]>();
     //for the view update purpose
     private List<string> damageDetails = new List<string>();
-    
+    private List<GameObject> wallsInst = new List<GameObject>();
     private List<Player> players = new List<Player>();
     private List<GameObject> playersInst = new List<GameObject>();
     private bool boardSet , locatedTank,isCreated,changeHappened;
@@ -37,7 +37,7 @@ public class InputTaker : MonoBehaviour {
     Vector3 tankLocation;
     string myTankName;
     private System.Object thisLock = new System.Object();
-
+    string just;
     
 
     void Start()
@@ -48,11 +48,11 @@ public class InputTaker : MonoBehaviour {
         oThread.Start();
         var instantiatedPrefab =Instantiate(map, new Vector3( 4.5f,-4.5f,0), originalRot) as GameObject;
         //for 20*20 9.5 and -9.5
-        instantiatedPrefab.transform.localScale = new Vector3(4.05f, 4.9f,0);
+        instantiatedPrefab.transform.localScale = new Vector3(4.05f,4.9f,0);
         //for 20*20 8.06 and 9.70
-        AICalculation.levels = 10;
-        AICalculation.cubes = 10;
-        Debug.Log("Thread started");
+        AICalculation.numbOfRows = 10;
+        AICalculation.nmbOfColumns = 10;
+        //Debug.Log("Thread started");
         this.boardSet = true;
         this.locatedTank = true;
 
@@ -65,12 +65,29 @@ public class InputTaker : MonoBehaviour {
             players.Clear();
         }
     }
+    void createWalls()
+    {
+        foreach(GameObject d in wallsInst)
+        {
+            Destroy(d);
+        }
+        wallsInst.Clear();
+        foreach(int[] wall1 in  walldet)
+        {
+            if (wall1[2] != 4)
+            {
+                Vector3 j = new Vector3(wall1[0], -wall1[1], 0);
+                wallsInst.Add((GameObject)Instantiate(wall, j, originalRot));
+            }
+        }
 
+    }
     void enemyCreations()
     {
-       
+            
             if (changeHappened)
             {
+                createWalls();
                 lock (thisLock)
                 {
                     foreach (GameObject x in playersInst)
@@ -79,7 +96,7 @@ public class InputTaker : MonoBehaviour {
                     }
                     
                     playersInst.Clear();
-                    Debug.Log("Cleared the palyerInst");
+                    //Debug.Log("Cleared the palyerInst");
                     foreach (Player x in players)
                     {
 
@@ -88,12 +105,12 @@ public class InputTaker : MonoBehaviour {
                         Quaternion localRotation= Quaternion.Euler(0, 90, 0); ;
                         Vector3 d = new Vector3(xPosition, yPosition, 0);
                         int rotation = x.direction;
-                        Debug.Log(rotation+""+xPosition+""+yPosition);
+                        //Debug.Log(rotation+""+xPosition+""+yPosition);
                         switch (rotation)
                         {
                             case 1:
                                 localRotation = Quaternion.Euler(0, 0, -90);
-                                Debug.Log("Direction changed");
+                                //Debug.Log("Direction changed");
                                 break;
                             case 2:
                                 localRotation = Quaternion.Euler(0, 0, 180);
@@ -105,7 +122,7 @@ public class InputTaker : MonoBehaviour {
                         string objName = x.Player_name;
                         if (objName.Equals(myTankName))
                         {
-                            Debug.Log("In my TankName");
+                            //Debug.Log("In my TankName");
                             playersInst.Add((GameObject)Instantiate(myTank, d, localRotation));
                         }
                         else
@@ -117,18 +134,12 @@ public class InputTaker : MonoBehaviour {
                     changeHappened = false;
                 }
 
-            }else
-            {
-                Thread.Sleep(300);
             }
         
         
         
     }
-    void createGridForCalc()
-    {
-        AICalculation.createTheFrame();
-    }
+    int l = 0;
     void takeInput()
     {
         System.Net.Sockets.TcpListener clientServer = null;
@@ -143,7 +154,11 @@ public class InputTaker : MonoBehaviour {
             while (true)
             {
                 string inputStr;
-
+                if (l == 0)
+                {
+                    RequestSender.Message = "JOIN#";
+                    RequestSender.sendRequest();
+                }
                 using (var stream = clientServer.AcceptTcpClient().GetStream())
                 {
                     byte[] data = new byte[1024];
@@ -158,18 +173,31 @@ public class InputTaker : MonoBehaviour {
                     }
                 }
                 Debug.Log(inputStr);
-
+                //just = inputStr;
                 String[] dataArray = inputStr.Split(':');
                 String dType = dataArray[0];
 
                 if (dType.Equals("G"))
                 {
+                    //Debug.Log("In the G");
+
+                    //RequestSender.sendRequest();
                     int lengthOfArray = dataArray.Length;
-                    string[] damages = dataArray[lengthOfArray - 1].Split(';');
-                    int damagesLength = damages.Length;
-                    string lastDamage = damages[damagesLength - 1];
+                    string[] walldamage = dataArray[lengthOfArray - 1].Split(';');
+                    int damagesLength = walldamage.Length;
+                    string lastDamage = walldamage[damagesLength - 1];
                     addEnemies();
-                    damages[damagesLength - 1] = lastDamage.Substring(0, lastDamage.Length - 1);
+                    walldamage[damagesLength - 1] = lastDamage.Substring(0, lastDamage.Length - 1);
+                    walldet.Clear();
+                    for(int p = 0; p < damagesLength; p++)
+                    {
+                        string[] f = walldamage[p].Split(',');
+                        int[] k = { Int32.Parse(f[0]), Int32.Parse(f[1]), Int32.Parse(f[2]) };
+                        walldet.Add(k);
+                    }
+                    AICalculation.walldet = walldet;
+                    //set wall damages
+
                     for (int i = 1; i < lengthOfArray - 1; i++)
                     {
                         string[] playerDetails = dataArray[i].Split(';');
@@ -183,23 +211,23 @@ public class InputTaker : MonoBehaviour {
                         int coins = int.Parse(playerDetails[5]);
                         int points = int.Parse(playerDetails[6]);
                         Player c1 = new Player(playerName, xCordintes, yCordinates, direction, health,
-                            coins, points, damages[i - 1]);
+                            coins, points);
                         players.Add(c1);
                     }
                     AICalculation.players = new List<Player>(this.players);
                     AICalculation.changed = true;
+                    
                     changeHappened = true;
 
 
                 }
                 else if (dType.Equals("I"))
                 {
-                    
-                    Debug.Log("Map Data is received");
+                    l = 1;
+                    //Debug.Log("Map Data is received");
                     //myTankName = dataArray[1];
                     String brickCordinates = dataArray[2];
                     wallList = getVecotors(brickCordinates);
-                    AICalculation.wallList = this.wallList;
                     String stoneCordinates = dataArray[3];
                     rockList = getVecotors(stoneCordinates);
                     AICalculation.rockList = this.rockList;
@@ -209,9 +237,9 @@ public class InputTaker : MonoBehaviour {
                     AICalculation.waterList = this.waterList;                
                     this.boardSet = false;
                     //no clarification yet for using a seperate thread
-                    Thread r = new Thread(createGridForCalc);
-                    r.Start();
-
+                    /*Thread r = new Thread(createGridForCalc);
+                    r.Start();*/
+                    AICalculation.updateRockList();
                 }else if (dType.Equals("S")){
                     //Game has started
                     //set the location of the tank
@@ -220,20 +248,20 @@ public class InputTaker : MonoBehaviour {
                     myTankName = withSemiColone[0];
 
                     string[] locations = withSemiColone[1].Split(',');
-                    Debug.Log("Setting the Tank posit");
+                   // Debug.Log("Setting the Tank posit");
                     int locationX = Int32.Parse(locations[0]);
                     int locationY = Int32.Parse(locations[1]);
                     string direction = withSemiColone[2];
                     int directionInt= int.Parse(direction.Substring(0, direction.Length - 1));
-                    Debug.Log("before vector");
+                    //Debug.Log("before vector");
                     tankLocation= new Vector3(locationX, - (locationY), 0);
                     locatedTank = false;
-                    Debug.Log("Set the position of Tank");
+                    //Debug.Log("Set the position of Tank");
                     AICalculation.myTank = myTankName;
                 }
                 else if (dType.Equals("C"))
                 {
-                    Debug.Log("Added to Array");
+                    //Debug.Log("Added to Array");
                     string[] positions = dataArray[1].Split(',');
                     int xPosition = Int32.Parse(positions[0]);
                     int yPosition = Int32.Parse(positions[1]);
@@ -244,7 +272,7 @@ public class InputTaker : MonoBehaviour {
                     coinTime.Add(timeToDisplay);
                 }else if (dType.Equals("L"))
                 {
-                    Debug.Log("Adding life packs"); 
+                    //Debug.Log("Adding life packs"); 
                     string[] lifePacks = dataArray[1].Split(',');
                     string timeOfMedi = dataArray[2];
                     float timeIntMedi = (int.Parse(timeOfMedi.Substring(0, timeOfMedi.Length - 1)))/1000;
@@ -258,24 +286,26 @@ public class InputTaker : MonoBehaviour {
         catch (Exception e)
         {
             Debug.Log("Crashed");
-            Debug.Log(e.Source);
+            Debug.Log(just);
+            //takeInput();
         }
     }
     void Update()
     {
 
         enemyCreations();
+        
         //Debug.Log(boardSet);
         if (boardSet==false)
         {
 
-            foreach (Vector3 vec in wallList)
-            {
-                Instantiate(wall, vec, originalRot);
-            }
             foreach (Vector3 vec in rockList)
             {
                 Instantiate(rocks, vec, originalRot);
+            }
+            foreach (Vector3 vec in wallList)
+            {
+                wallsInst.Add((GameObject)Instantiate(wall, vec, originalRot));
             }
             foreach (Vector3 vec in waterList)
             {

@@ -6,10 +6,10 @@ using System.Threading;
 
 public class RequestSender : MonoBehaviour {
 
-    private volatile string message = "JOIN#";
+    private volatile static string message = "JOIN#";
     Thread oThread;
 
-    public string Message
+    public static string Message
     {
         get
         {
@@ -21,39 +21,34 @@ public class RequestSender : MonoBehaviour {
             message = value;
         }
     }
-
-    private void Start()
+    public static void sendRequest()
     {
-        
-        oThread = new Thread(sendRequest);
-        oThread.IsBackground = true;
-        oThread.Start();
-    }
-    public void sendRequest()
-    {
-        while (true)
-        {
+       // while (true)
+       // {
             try
             {
                 using (var client = new System.Net.Sockets.TcpClient("127.0.0.1", 6000))
                 {
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(2000);
                     //Debug.Log("Join Sent");
-
-                    var byteData = Encoding.ASCII.GetBytes(Message);
-                    client.GetStream().Write(byteData, 0, byteData.Length);
+                    if (!message.Equals(""))
+                    {
+                        var byteData = Encoding.ASCII.GetBytes(Message);
+                        client.GetStream().Write(byteData, 0, byteData.Length);
+                        Debug.Log(message);
+                        message = "";
+                        
+                    }
                 }
-                message = "RIGHT#";
-                /*Thread.Sleep(500);
-                message = "SHOOT#";*/
+                
             }
             catch (Exception ex)
             {
                 
                 Debug.Log("Error");
-                break;
+                //break;
             }
-        }
+        //}
     }
     
 }

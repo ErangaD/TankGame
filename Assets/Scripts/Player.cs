@@ -6,12 +6,8 @@ public class Player {
     public string Player_name;
     public int locationX, locationY,direction;
     public int health, coins, point;
-    public string damage;
 
-    
-
-    public Player(string name,int locationX,int locationY,int direction,int health,int coins,int point,
-        string damage) 
+    public Player(string name,int locationX,int locationY,int direction,int health,int coins,int point) 
     {
         
         this.Player_name = name;
@@ -21,7 +17,6 @@ public class Player {
         this.health = health;
         this.coins = coins;
         this.point = point;
-        this.damage = damage;
     }
 	
 }
