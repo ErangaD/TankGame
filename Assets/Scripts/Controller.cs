@@ -5,23 +5,12 @@ using System;
 
 public class Controller : MonoBehaviour {
 
-    void Start()
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        
-        
-        
-        
-        
-        //InputTaker.Connect();
-
+        if (collision.gameObject.name == "coin")
+        {
+            Destroy(collision.gameObject);
+            Debug.Log("AMMMOHGJBSHGDBYHUSBHSJB                 hklfhsifhuh HNIUHUIJKNJK");
+        }
     }
-
-   
-    /*static Controller()
-{
-    Debug.Log("Updating");
-
-    RequestSender.sendRequests("JOIN#");
-    InputTaker.Connect("127.0.0.1");
-}*/
 }

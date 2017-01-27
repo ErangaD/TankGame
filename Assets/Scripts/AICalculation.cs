@@ -414,7 +414,7 @@ public class AICalculation : MonoBehaviour
                     //we can't make the move 
                     return false;
                 }
-                Debug.Log(dk[0] + "    " + dk[1]);
+                
             }
             return true;
         }

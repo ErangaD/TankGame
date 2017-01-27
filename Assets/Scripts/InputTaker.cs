@@ -25,6 +25,8 @@ public class InputTaker : MonoBehaviour {
     private List<float> coinTime = new List<float>();
     private List<Vector3> healthList = new List<Vector3>();
     private List<float> healtTime = new List<float>();
+    private List<GameObject> coinObject = new List<GameObject>();
+    private List<GameObject> healthObj = new List<GameObject>();
     private volatile List<int[]> walldet=new List<int[]>();
     //for the view update purpose
     private List<string> damageDetails = new List<string>();
@@ -69,9 +71,11 @@ public class InputTaker : MonoBehaviour {
     {
         foreach(GameObject d in wallsInst)
         {
-            Destroy(d);
+            DestroyImmediate(d);
         }
+        //Debug.Log(wallsInst.Count);
         wallsInst.Clear();
+
         foreach(int[] wall1 in  walldet)
         {
             if (wall1[2] != 4)
@@ -80,6 +84,10 @@ public class InputTaker : MonoBehaviour {
                 wallsInst.Add((GameObject)Instantiate(wall, j, originalRot));
             }
         }
+
+    }
+    void checkForCollision()
+    {
 
     }
     void enemyCreations()
@@ -294,7 +302,7 @@ public class InputTaker : MonoBehaviour {
     {
 
         enemyCreations();
-        
+        checkForCollision();
         //Debug.Log(boardSet);
         if (boardSet==false)
         {
@@ -335,16 +343,21 @@ public class InputTaker : MonoBehaviour {
         }
         if (coinList.Count != 0)
         {
+            GameObject cv=(GameObject)Instantiate(coins, coinList[0], originalRot);
+            cv.name = "coin";
+            Destroy(cv, coinTime[0]);
             
-            Destroy((GameObject)Instantiate(coins, coinList[0], originalRot), coinTime[0]);
             coinList.RemoveAt(0);
             coinTime.RemoveAt(0);
             Debug.Log("Coins were initialized");
         }
         if (healthList.Count != 0)
         {
+            GameObject cv = (GameObject)Instantiate(health, healthList[0], originalRot);
+            cv.name = "health";
             
-            Destroy((GameObject)Instantiate(health, healthList[0], originalRot), healtTime[0]);
+            Destroy(cv, healtTime[0]);
+            
             healthList.RemoveAt(0);
             healtTime.RemoveAt(0);
             Debug.Log("Life Objects initialized");
@@ -370,4 +383,6 @@ public class InputTaker : MonoBehaviour {
         return vectors;
 
     }
+
+    
 }
