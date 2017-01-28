@@ -10,7 +10,7 @@ using System.Collections;
 public class InputTaker : MonoBehaviour {
 
     public GameObject map;
-    public GameObject bullet;
+    
     public GameObject enemy1;
     public GameObject rocks;
     public GameObject wall;
@@ -34,7 +34,7 @@ public class InputTaker : MonoBehaviour {
     private List<GameObject> wallsInst = new List<GameObject>();
     private List<Player> players = new List<Player>();
     private List<GameObject> playersInst = new List<GameObject>();
-    private bool boardSet , locatedTank,isCreated,changeHappened;
+    private bool boardSet , locatedTank,isCreated,changeHappened,firstTime1,firstTime;
     Quaternion originalRot;
     Thread oThread,oThread1;
     Vector3 tankLocation;
@@ -45,6 +45,7 @@ public class InputTaker : MonoBehaviour {
 
     void Start()
     {
+        firstTime = true;
         originalRot = transform.rotation;
         oThread = new Thread(takeInput);
         oThread.IsBackground = true;    
@@ -59,6 +60,14 @@ public class InputTaker : MonoBehaviour {
         this.boardSet = true;
         this.locatedTank = true;
 
+    }
+    void callIt()
+    {
+        if (firstTime)
+        {
+            firstTime1 = true;
+            firstTime = false;
+        }
     }
     void addEnemies()
     {
@@ -87,10 +96,6 @@ public class InputTaker : MonoBehaviour {
         }
 
     }
-    void checkForCollision()
-    {
-
-    }
     void enemyCreations()
     {
             
@@ -99,75 +104,116 @@ public class InputTaker : MonoBehaviour {
                 createWalls();
                 lock (thisLock)
                 {
-                    foreach (GameObject x in playersInst)
+                    if (firstTime1)
                     {
-                        Destroy(x);
-                    }
-                    
-                    playersInst.Clear();
-                    //Debug.Log("Cleared the palyerInst");
-                    foreach (Player x in players)
-                    {
+                        playersInst.Clear();
+                        firstTime1 = false;
+                        foreach(Player x in players)
+                        {
+                            
+                            int xPosition = x.locationX;
+                            int yPosition = -x.locationY;
+                            Quaternion localRotation = Quaternion.Euler(0, 0, 0); ;
+                            Vector3 d = new Vector3(xPosition, yPosition, 0);
+                            string objName = x.Player_name;
+                            if (objName.Equals(myTankName))
+                            {
+                            //Debug.Log("In my TankName");
+                                GameObject df = (GameObject)Instantiate(myTank, d, localRotation);
+                                df.name = myTankName;
+                                playersInst.Add(df);
+
+                            }
+                            else
+                            {
+                                GameObject df = (GameObject)Instantiate(enemy1, d, localRotation);
+                                df.name = x.Player_name;
+                                playersInst.Add(df);
+
+                            }
                         
+                        }
+                        
+                    }           
+                    
+                    for(int i = 0; i < playersInst.Count; i++)
+                    {
+                        if (playersInst[i] != null && players.Count>i)
+                        {
+                            if (playersInst[i].gameObject.name == players[i].Player_name)
+                            {
+                                playersInst[i].gameObject.SendMessage("doUpdate", players[i]);
+                            }
+                        }
+                        
+                    }
+                /*foreach (Player x in players)
+                {
+                    
+                    if (x.health > 0)
+                    {
                         int xPosition = x.locationX;
                         int yPosition = -x.locationY;
-                        Quaternion localRotation= Quaternion.Euler(0, 0, 0); ;
+                        Quaternion localRotation = Quaternion.Euler(0, 0, 0); ;
                         Vector3 d = new Vector3(xPosition, yPosition, 0);
-                        int bulletX =xPosition;
-                        int bulletY = yPosition-1;
+                        int bulletX = xPosition;
+                        int bulletY = yPosition - 1;
                         int rotation = x.direction;
                         //Debug.Log(rotation+""+xPosition+""+yPosition);
                         switch (rotation)
                         {
                             case 1:
                                 localRotation = Quaternion.Euler(0, 0, -90);
-                                bulletX = xPosition+1;
+                                bulletX = xPosition + 1;
                                 bulletY = yPosition;
                                 //Debug.Log("Direction changed");
                                 break;
                             case 2:
                                 localRotation = Quaternion.Euler(0, 0, 180);
                                 bulletX = xPosition;
-                                bulletY = yPosition+1;
+                                bulletY = yPosition + 1;
                                 break;
                             case 3:
                                 localRotation = Quaternion.Euler(0, 0, 90);
                                 bulletX = xPosition - 1;
                                 bulletY = yPosition;
-                            break;
+                                break;
                         }
+                        GameObject myt;
                         string objName = x.Player_name;
                         if (objName.Equals(myTankName))
                         {
                             //Debug.Log("In my TankName");
-                            GameObject myt = (GameObject)Instantiate(myTank, d, localRotation);
-                            myt.name="Tank";
+                            myt = (GameObject)Instantiate(myTank, d, localRotation);
+                            myt.name = "Tank";
                             playersInst.Add(myt);
-                            
+
                         }
                         else
                         {
-                            GameObject myt = (GameObject)Instantiate(enemy1, d, localRotation);
+                            myt = (GameObject)Instantiate(enemy1, d, localRotation);
                             myt.name = "Tank";
                             playersInst.Add(myt);
-                            
+
                         }
                         Vector3 fh = new Vector3(bulletX, bulletY, 0);
                         if (x.shot == 1)
                         {
-                            if((bulletX>=0 && bulletX<10)&&(bulletY>=0 && bulletY <10))
+                            if ((bulletX >= 0 && bulletX < 10) && (bulletY >= 0 && bulletY < 10))
                             {
                                 GameObject bull = Instantiate(bullet, d, localRotation) as GameObject;
                                 bull.SendMessage("setPose", rotation);
+                                //Physics.IgnoreCollision(bull.GetComponent<Collider>(),myt.GetComponent<Collider>());
                             }
-                            
+
                         }
-                }
+                    }
                     //can also update score inside this method
                     changeHappened = false;
+                }*/
                 }
-
-            }
+                changeHappened = false;
+        }
         
         
         
@@ -205,14 +251,14 @@ public class InputTaker : MonoBehaviour {
                         inputStr = Encoding.ASCII.GetString(ms.ToArray(), 0, (int)ms.Length);
                     }
                 }
-                Debug.Log(inputStr);
+                //Debug.Log(inputStr);
                 //just = inputStr;
                 String[] dataArray = inputStr.Split(':');
                 String dType = dataArray[0];
 
                 if (dType.Equals("G"))
                 {
-                    //Debug.Log("In the G");
+                    Debug.Log(inputStr);
 
                     //RequestSender.sendRequest();
                     int lengthOfArray = dataArray.Length;
@@ -228,7 +274,7 @@ public class InputTaker : MonoBehaviour {
                         int[] k = { Int32.Parse(f[0]), Int32.Parse(f[1]), Int32.Parse(f[2]) };
                         walldet.Add(k);
                     }
-                    AICalculation.walldet = walldet;
+                    AICalculation.walldet = new List<int[]>(this.walldet);
                     //set wall damages
 
                     for (int i = 1; i < lengthOfArray - 1; i++)
@@ -249,7 +295,7 @@ public class InputTaker : MonoBehaviour {
                     }
                     AICalculation.players = new List<Player>(this.players);
                     AICalculation.changed = true;
-                    
+                    callIt();
                     changeHappened = true;
 
 
@@ -258,7 +304,7 @@ public class InputTaker : MonoBehaviour {
                 {
                     l = 1;
                     //Debug.Log("Map Data is received");
-                    //myTankName = dataArray[1];
+                    myTankName = dataArray[1];
                     String brickCordinates = dataArray[2];
                     wallList = getVecotors(brickCordinates);
                     String stoneCordinates = dataArray[3];
@@ -273,10 +319,11 @@ public class InputTaker : MonoBehaviour {
                     /*Thread r = new Thread(createGridForCalc);
                     r.Start();*/
                     AICalculation.updateRockList();
+                    AICalculation.myTank = myTankName;
                 }else if (dType.Equals("S")){
                     //Game has started
                     //set the location of the tank
-                    string[] withSemiColone = dataArray[1].Split(';');
+                    /*string[] withSemiColone = dataArray[1].Split(';');
                     //to identify the tank
                     myTankName = withSemiColone[0];
 
@@ -290,7 +337,7 @@ public class InputTaker : MonoBehaviour {
                     tankLocation= new Vector3(locationX, - (locationY), 0);
                     locatedTank = false;
                     //Debug.Log("Set the position of Tank");
-                    AICalculation.myTank = myTankName;
+                    AICalculation.myTank = myTankName;*/
                 }
                 else if (dType.Equals("C"))
                 {
@@ -313,6 +360,9 @@ public class InputTaker : MonoBehaviour {
                     int yPosition = Int32.Parse(lifePacks[1]);
                     healthList.Add(new Vector3(xPosition, -(yPosition), 0));
                     healtTime.Add(timeIntMedi);
+                }else if (dType.Equals("DEAD#"))
+                {
+                    Debug.Log("Game has ended");
                 }
            }
         }
@@ -327,19 +377,22 @@ public class InputTaker : MonoBehaviour {
     {
 
         enemyCreations();
-        checkForCollision();
+        
         //Debug.Log(boardSet);
         if (boardSet==false)
         {
 
             foreach (Vector3 vec in rockList)
-            {
-                Instantiate(rocks, vec, originalRot);
+            {             
+                GameObject jk = (GameObject)Instantiate(rocks, vec, originalRot);
+                jk.name = "rock";
             }
-            foreach (Vector3 vec in wallList)
+            /*foreach (Vector3 vec in wallList)
             {
-                wallsInst.Add((GameObject)Instantiate(wall, vec, originalRot));
-            }
+                GameObject jk = (GameObject)Instantiate(wall, vec, originalRot);
+                jk.name = "wall";
+                wallsInst.Add(jk);
+            }*/
             foreach (Vector3 vec in waterList)
             {
                 Instantiate(water, vec, originalRot);
@@ -352,16 +405,16 @@ public class InputTaker : MonoBehaviour {
             if (!isCreated)
             {
                 
-                playersInst.Add((GameObject)Instantiate(myTank, tankLocation, originalRot));
+                //playersInst.Add((GameObject)Instantiate(myTank, tankLocation, originalRot));
                 
                 isCreated = true;
-                Debug.Log("Tank is initiated");
+                //Debug.Log("Tank is initiated");
             }
             else
             {
                 myTank.transform.position = tankLocation;
                 locatedTank = true;
-                Debug.Log("Tank Location set");
+                //Debug.Log("Tank Location set");
             }
             
             
@@ -369,14 +422,14 @@ public class InputTaker : MonoBehaviour {
         if (coinList.Count != 0)
         {
             GameObject cv=(GameObject)Instantiate(coins, coinList[0], originalRot);
-            //cv.name = coinObject.Count.ToString();
+            cv.name = "coin";
             //coinObject.Add(cv);
             
             Destroy(cv, coinTime[0]);
-            Debug.Log(coinObject.Count);
+            //Debug.Log(coinObject.Count);
             coinList.RemoveAt(0);
             coinTime.RemoveAt(0);
-            Debug.Log("Coins were initialized");
+            //Debug.Log("Coins were initialized");
         }
         if (healthList.Count != 0)
         {
@@ -387,7 +440,7 @@ public class InputTaker : MonoBehaviour {
             
             healthList.RemoveAt(0);
             healtTime.RemoveAt(0);
-            Debug.Log("Life Objects initialized");
+            //Debug.Log("Life Objects initialized");
         }
         
    }

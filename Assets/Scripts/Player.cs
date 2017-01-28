@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : MonoBehaviour
+public class Player 
 {
     
     public string Player_name;
@@ -20,19 +20,4 @@ public class Player : MonoBehaviour
         this.point = point;
         this.shot = shot;
     }
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.name == "health")
-        {
-            Destroy(collision.gameObject);
-        }
-    }
-    void Update()
-    {
-        if (changed)
-        {
-
-        }
-    }
-
 }

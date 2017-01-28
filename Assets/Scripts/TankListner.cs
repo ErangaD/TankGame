@@ -71,7 +71,7 @@ public class TankListner : MonoBehaviour
             }
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
-                Debug.logger.Log("dfg" + Mathf.Round(transform.position.x) + "  " + (Mathf.Round(transform.position.y)));
+                    Debug.logger.Log("dfg" + Mathf.Round(transform.position.x) + "  " + (Mathf.Round(transform.position.y)));
                 transform.rotation = originalRotation * Quaternion.Euler(0, 0, 90);
                 if (Mathf.Round(transform.position.x) >= 1)
                 {

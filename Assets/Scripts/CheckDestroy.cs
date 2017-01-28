@@ -9,7 +9,7 @@ public class CheckDestroy : MonoBehaviour
     {
         if (col.gameObject.name == "Tank")
         {
-
+            
             Destroy(this.gameObject);
         }
     }

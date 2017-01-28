@@ -94,7 +94,7 @@ public class AICalculation : MonoBehaviour
                         if (myLocationY < di[1])
                         {
                             //I am under the opponent
-                            if (mydirection == 0)
+                            if (mydirection == 2)
                             {
                                 RequestSender.Message = "SHOOT#";
                             }
@@ -106,7 +106,7 @@ public class AICalculation : MonoBehaviour
                         else
                         {
                             //I am above the opponent
-                            if (mydirection == 2)
+                            if (mydirection == 0)
                             {
                                 RequestSender.Message = "SHOOT#";
                             }
@@ -168,7 +168,7 @@ public class AICalculation : MonoBehaviour
             if(checker==0)
             {
                 //There are no one in the sorizontal and vertical lines
-                Debug.Log("In the Checker WOOOO hhhaaaa");
+                //Debug.Log("In the Checker WOOOO hhhaaaa");
                 if (mydamageLevel <= 2)
                 {
                     //this condition has to be set cosidering the health
@@ -320,7 +320,7 @@ public class AICalculation : MonoBehaviour
             }
             changed = false;
             RequestSender.sendRequest();
-            Debug.Log("Change was Assessed in the AICALCULATIONS");
+            //Debug.Log("Change was Assessed in the AICALCULATIONS");
         }
 
     }

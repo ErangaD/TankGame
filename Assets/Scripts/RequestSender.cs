@@ -21,10 +21,19 @@ public class RequestSender : MonoBehaviour {
             message = value;
         }
     }
+    /*private void Update()
+    {
+
+        Thread.Sleep(1000);
+        message = "SHOOT#";
+        sendRequest();
+        Thread.Sleep(1000);
+        message = "DOWN#";
+        sendRequest();
+    }*/
+
     public static void sendRequest()
     {
-       // while (true)
-       // {
             try
             {
                 using (var client = new System.Net.Sockets.TcpClient("127.0.0.1", 6000))
@@ -38,7 +47,7 @@ public class RequestSender : MonoBehaviour {
                         Debug.Log(message);
                         message = "";
                         
-                    }
+                }
                 }
                 
             }
@@ -48,7 +57,6 @@ public class RequestSender : MonoBehaviour {
                 Debug.Log("Error");
                 //break;
             }
-        //}
     }
     
 }
