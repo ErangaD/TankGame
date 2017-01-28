@@ -63,14 +63,15 @@ public class AICalculation : MonoBehaviour
                 }
                 else
                 {
-                    int[] enemyLocation = { c.locationX, c.locationY, c.direction };
+                    int[] enemyLocation = { c.locationX, c.locationY, c.direction,c.health };
                     array.Add( enemyLocation);
                 }
             }
             int checker = 0;
             foreach (int[] di in array)
             {
-                if (myLocationX == di[0])
+               
+                if (myLocationX == di[0] && di[3]>0)
                 {
                     checker = 1;
                     //checking there are rocks in the way
@@ -95,11 +96,11 @@ public class AICalculation : MonoBehaviour
                             //I am under the opponent
                             if (mydirection == 0)
                             {
-                                //send shoot
+                                RequestSender.Message = "SHOOT#";
                             }
                             else
                             {
-                                //send up
+                                RequestSender.Message = "DOWN#";
                             }
                         }
                         else
@@ -107,16 +108,16 @@ public class AICalculation : MonoBehaviour
                             //I am above the opponent
                             if (mydirection == 2)
                             {
-                                //send shoot
+                                RequestSender.Message = "SHOOT#";
                             }
                             else
                             {
-                                //send Down
+                                RequestSender.Message = "UP#";
                             }
                         }
                     }
                 }
-                else if (myLocationY == di[1])
+                else if (myLocationY == di[1] && di[3] > 0)
                 {
                     //In the same row
                     checker = 1;

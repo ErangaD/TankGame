@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player {
+public class Player : MonoBehaviour
+{
     
     public string Player_name;
     public int locationX, locationY,direction;
-    public int health, coins, point;
-
-    public Player(string name,int locationX,int locationY,int direction,int health,int coins,int point) 
+    public int health, coins, point,shot;
+    public static volatile bool changed;
+    public Player(string name,int locationX,int locationY,int direction,int health,int coins,int point,int shot) 
     {
         
         this.Player_name = name;
@@ -17,6 +18,21 @@ public class Player {
         this.health = health;
         this.coins = coins;
         this.point = point;
+        this.shot = shot;
     }
-	
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.name == "health")
+        {
+            Destroy(collision.gameObject);
+        }
+    }
+    void Update()
+    {
+        if (changed)
+        {
+
+        }
+    }
+
 }

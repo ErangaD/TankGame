@@ -7,10 +7,10 @@ public class Controller : MonoBehaviour {
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.name == "coin")
+        if (collision.gameObject.name == "health")
         {
             Destroy(collision.gameObject);
-            Debug.Log("AMMMOHGJBSHGDBYHUSBHSJB                 hklfhsifhuh HNIUHUIJKNJK");
         }
     }
+    
 }

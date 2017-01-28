@@ -10,6 +10,7 @@ using System.Collections;
 public class InputTaker : MonoBehaviour {
 
     public GameObject map;
+    public GameObject bullet;
     public GameObject enemy1;
     public GameObject rocks;
     public GameObject wall;
@@ -25,8 +26,8 @@ public class InputTaker : MonoBehaviour {
     private List<float> coinTime = new List<float>();
     private List<Vector3> healthList = new List<Vector3>();
     private List<float> healtTime = new List<float>();
-    private List<GameObject> coinObject = new List<GameObject>();
-    private List<GameObject> healthObj = new List<GameObject>();
+    public static volatile List<GameObject> coinObject = new List<GameObject>();
+    public static volatile List<GameObject> healthObj = new List<GameObject>();
     private volatile List<int[]> walldet=new List<int[]>();
     //for the view update purpose
     private List<string> damageDetails = new List<string>();
@@ -107,37 +108,61 @@ public class InputTaker : MonoBehaviour {
                     //Debug.Log("Cleared the palyerInst");
                     foreach (Player x in players)
                     {
-
+                        
                         int xPosition = x.locationX;
                         int yPosition = -x.locationY;
-                        Quaternion localRotation= Quaternion.Euler(0, 90, 0); ;
+                        Quaternion localRotation= Quaternion.Euler(0, 0, 0); ;
                         Vector3 d = new Vector3(xPosition, yPosition, 0);
+                        int bulletX =xPosition;
+                        int bulletY = yPosition-1;
                         int rotation = x.direction;
                         //Debug.Log(rotation+""+xPosition+""+yPosition);
                         switch (rotation)
                         {
                             case 1:
                                 localRotation = Quaternion.Euler(0, 0, -90);
+                                bulletX = xPosition+1;
+                                bulletY = yPosition;
                                 //Debug.Log("Direction changed");
                                 break;
                             case 2:
                                 localRotation = Quaternion.Euler(0, 0, 180);
+                                bulletX = xPosition;
+                                bulletY = yPosition+1;
                                 break;
                             case 3:
                                 localRotation = Quaternion.Euler(0, 0, 90);
-                                break;
+                                bulletX = xPosition - 1;
+                                bulletY = yPosition;
+                            break;
                         }
                         string objName = x.Player_name;
                         if (objName.Equals(myTankName))
                         {
                             //Debug.Log("In my TankName");
-                            playersInst.Add((GameObject)Instantiate(myTank, d, localRotation));
+                            GameObject myt = (GameObject)Instantiate(myTank, d, localRotation);
+                            myt.name="Tank";
+                            playersInst.Add(myt);
+                            
                         }
                         else
                         {
-                            playersInst.Add((GameObject)Instantiate(enemy1, d, localRotation));
+                            GameObject myt = (GameObject)Instantiate(enemy1, d, localRotation);
+                            myt.name = "Tank";
+                            playersInst.Add(myt);
+                            
                         }
-                    }
+                        Vector3 fh = new Vector3(bulletX, bulletY, 0);
+                        if (x.shot == 1)
+                        {
+                            if((bulletX>=0 && bulletX<10)&&(bulletY>=0 && bulletY <10))
+                            {
+                                GameObject bull = Instantiate(bullet, d, localRotation) as GameObject;
+                                bull.SendMessage("setPose", rotation);
+                            }
+                            
+                        }
+                }
                     //can also update score inside this method
                     changeHappened = false;
                 }
@@ -214,12 +239,12 @@ public class InputTaker : MonoBehaviour {
                         int xCordintes = int.Parse(locations[0]);
                         int yCordinates = int.Parse(locations[1]);
                         int direction = int.Parse(playerDetails[2]);
-                        string shotedStatus = playerDetails[3];
+                        int shotedStatus =int.Parse(playerDetails[3]);
                         int health = int.Parse(playerDetails[4]);
                         int coins = int.Parse(playerDetails[5]);
                         int points = int.Parse(playerDetails[6]);
                         Player c1 = new Player(playerName, xCordintes, yCordinates, direction, health,
-                            coins, points);
+                            coins, points,shotedStatus);
                         players.Add(c1);
                     }
                     AICalculation.players = new List<Player>(this.players);
@@ -344,9 +369,11 @@ public class InputTaker : MonoBehaviour {
         if (coinList.Count != 0)
         {
             GameObject cv=(GameObject)Instantiate(coins, coinList[0], originalRot);
-            cv.name = "coin";
-            Destroy(cv, coinTime[0]);
+            //cv.name = coinObject.Count.ToString();
+            //coinObject.Add(cv);
             
+            Destroy(cv, coinTime[0]);
+            Debug.Log(coinObject.Count);
             coinList.RemoveAt(0);
             coinTime.RemoveAt(0);
             Debug.Log("Coins were initialized");
@@ -355,7 +382,7 @@ public class InputTaker : MonoBehaviour {
         {
             GameObject cv = (GameObject)Instantiate(health, healthList[0], originalRot);
             cv.name = "health";
-            
+            //  healthObj.Add(cv);
             Destroy(cv, healtTime[0]);
             
             healthList.RemoveAt(0);
