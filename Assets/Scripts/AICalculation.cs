@@ -22,8 +22,37 @@ public class AICalculation : MonoBehaviour
     private int mydamageLevel;
     public static int numbOfRows, i;
     public static int nmbOfColumns;
+    bool second;
+    public static string messa;
+    Thread oThread;
     // Update is called once per frame
-    
+    /*private void Start()
+    {
+        oThread= new Thread(sendMessage);
+        oThread.IsBackground = true;
+        second = false;
+        oThread.Start();
+    }
+    private void OnDestroy()
+    {
+        oThread.Abort();
+    }*/
+    void sendMessage()
+    {
+       
+           
+                if (second)
+                {
+                    RequestSender.Message = messa;
+                    //second = false;
+                }
+                
+                
+            
+            
+        
+        
+    }
     public static void updateRockList()
     {
         //This has to be called after updating the rockList vaector 
@@ -67,6 +96,7 @@ public class AICalculation : MonoBehaviour
                     array.Add( enemyLocation);
                 }
             }
+
             int checker = 0;
             foreach (int[] di in array)
             {
@@ -165,22 +195,25 @@ public class AICalculation : MonoBehaviour
             }
 
             //put a condition
-            if(checker==0)
+            if (checker == 0)
             {
                 //There are no one in the sorizontal and vertical lines
                 //Debug.Log("In the Checker WOOOO hhhaaaa");
-                if (mydamageLevel <= 2)
+                if (!second)
                 {
-                    //this condition has to be set cosidering the health
-
-                }
-                else
-                {
-                    int x;
-                    while (true)
+                    if (mydamageLevel <= 2)
                     {
-                        x=Random.Range(0, 4);
-                        if (x == 0) { 
+                        //this condition has to be set cosidering the health
+
+                    }
+                    else
+                    {
+                        int x;
+                        while (true)
+                        {
+                            x = Random.Range(0, 4);
+                            if (x == 0)
+                            {
                                 if ((myLocationY - 1) >= 0)
                                 {
                                     //search for an enemy in the mylocationy+1 
@@ -197,8 +230,13 @@ public class AICalculation : MonoBehaviour
                                                 int r = checkForWalls(myLocationY - 1, true);
                                                 if (r == 0)
                                                 {
-                                                    
+
                                                     RequestSender.Message = "UP#";
+                                                    if (mydirection != 0)
+                                                    {
+
+                                                        second = true;
+                                                    }
                                                     break;
                                                 }
                                                 else if (r == 1)
@@ -208,119 +246,147 @@ public class AICalculation : MonoBehaviour
                                                 }
                                             }
                                         }
-                                        
+
                                     }
-                                    
+
                                 }
                             }
-                        else if (x == 2)
-                        {
-                            if (myLocationY + 1 < numbOfRows)
+                            else if (x == 2)
                             {
-                                //search for an enemy in the mylocationy+1 
-                                if (goodForRocks(myLocationY + 1, true))
+                                if (myLocationY + 1 < numbOfRows)
                                 {
-                                    //good to go without rocks
-                                    if (readyToGo(myLocationY + 1, true))
+                                    //search for an enemy in the mylocationy+1 
+                                    if (goodForRocks(myLocationY + 1, true))
                                     {
-                                        //No impact of an enemy
-                                        //have to check for walls and water
-                                        if (checkForWater(myLocationY + 1, true))
+                                        //good to go without rocks
+                                        if (readyToGo(myLocationY + 1, true))
                                         {
-                                            //no water no rock no danger
-                                            int r = checkForWalls(myLocationY + 1, true);
-                                            if (r == 0)
+                                            //No impact of an enemy
+                                            //have to check for walls and water
+                                            if (checkForWater(myLocationY + 1, true))
                                             {
-                                                RequestSender.Message = "DOWN#";
-                                                break;
-                                            }
-                                            else if (r == 1)
-                                            {
-                                                RequestSender.Message = "SHOOT#";
-                                                break;
+                                                //no water no rock no danger
+                                                int r = checkForWalls(myLocationY + 1, true);
+                                                if (r == 0)
+                                                {
+                                                    RequestSender.Message = "DOWN#";
+                                                    
+                                                    if (mydirection != 2)
+                                                    {
+                                                        
+                                                        second = true;
+                                                    }
+
+                                                    break;
+                                                }
+                                                else if (r == 1)
+                                                {
+                                                    RequestSender.Message = "SHOOT#";
+                                                    break;
+                                                }
                                             }
                                         }
-                                    }
-                                    
-                                }
 
+                                    }
+
+                                }
                             }
-                        }
-                        else if (x == 1)
-                        {
-                            //going towards right
-                            if (myLocationX + 1 < nmbOfColumns)
+                            else if (x == 1)
                             {
-                                //search for an enemy in the mylocationy+1 
-                                if (goodForRocks(myLocationX + 1, false))
+                                //going towards right
+                                if (myLocationX + 1 < nmbOfColumns)
                                 {
-                                    //good to go without rocks
-                                    if (readyToGo(myLocationX+ 1, false))
+                                    //search for an enemy in the mylocationy+1 
+                                    if (goodForRocks(myLocationX + 1, false))
                                     {
-                                        //No impact of an enemy
-                                        //have to check for walls and water
-                                        if (checkForWater(myLocationX + 1, false))
+                                        //good to go without rocks
+                                        if (readyToGo(myLocationX + 1, false))
                                         {
-                                            //no water no rock no danger
-                                            int r = checkForWalls(myLocationX + 1, false);
-                                            if (r == 0)
+                                            //No impact of an enemy
+                                            //have to check for walls and water
+                                            if (checkForWater(myLocationX + 1, false))
                                             {
-                                                RequestSender.Message = "RIGHT#";
-                                                break;
-                                            }
-                                            else if (r == 1)
-                                            {
-                                                RequestSender.Message = "SHOOT#";
-                                                break;
+                                                //no water no rock no danger
+                                                int r = checkForWalls(myLocationX + 1, false);
+                                                if (r == 0)
+                                                {
+                                                    RequestSender.Message = "RIGHT#";
+                                                    if (mydirection != 1)
+                                                    {
+                                                        second = true;
+                                                    }
+                                                    break;
+                                                }
+                                                else if (r == 1)
+                                                {
+                                                    RequestSender.Message = "SHOOT#";
+                                                    break;
+                                                }
                                             }
                                         }
+
                                     }
 
                                 }
-
                             }
-                        }
-                        else
-                        {
-                            if (myLocationX - 1 >= 0)
+                            else
                             {
-                                //search for an enemy in the mylocationy+1 
-                                if (goodForRocks(myLocationX - 1, false))
+                                if (myLocationX - 1 >= 0)
                                 {
-                                    //good to go without rocks
-                                    if (readyToGo(myLocationX - 1, false))
+                                    //search for an enemy in the mylocationy+1 
+                                    if (goodForRocks(myLocationX - 1, false))
                                     {
-                                        //No impact of an enemy
-                                        //have to check for walls and water
-                                        if (checkForWater(myLocationX - 1, false))
+                                        //good to go without rocks
+                                        if (readyToGo(myLocationX - 1, false))
                                         {
-                                            //no water no rock no danger
-                                            int r = checkForWalls(myLocationX - 1, false);
-                                            if (r == 0)
+                                            //No impact of an enemy
+                                            //have to check for walls and water
+                                            if (checkForWater(myLocationX - 1, false))
                                             {
-                                                RequestSender.Message = "LEFT#";
-                                                break;
-                                            }
-                                            else if (r == 1)
-                                            {
-                                                RequestSender.Message = "SHOOT#";
-                                                break;
+                                                //no water no rock no danger
+                                                int r = checkForWalls(myLocationX - 1, false);
+                                                if (r == 0)
+                                                {
+                                                    RequestSender.Message = "LEFT#";
+                                                    if (mydirection != 3)
+                                                    {
+
+                                                        second = true;
+                                                    }
+                                                    break;
+                                                }
+                                                else if (r == 1)
+                                                {
+                                                    RequestSender.Message = "SHOOT#";
+                                                    break;
+                                                }
                                             }
                                         }
+
                                     }
 
                                 }
-
                             }
                         }
                     }
+
+                    RequestSender.sendRequest();
                 }
+                else
+                {
+                    RequestSender.sendRequest();
+                    second = false;
+                }
+                
+                
 
-
+                //Debug.Log("Change was Assessed in the AICALCULATIONS");
+            }
+            else
+            {
+                RequestSender.sendRequest();
             }
             changed = false;
-            RequestSender.sendRequest();
-            //Debug.Log("Change was Assessed in the AICALCULATIONS");
         }
 
     }

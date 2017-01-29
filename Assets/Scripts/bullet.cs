@@ -4,14 +4,14 @@ using System.Collections;
 public class bullet : MonoBehaviour {
 
     volatile int rotation;
-    
-	// Update is called once per frame
-	void Update () {
+    //public Transform bulletPrefab;
+    // Update is called once per frame
+    void Update () {
       
        
             Vector3 position = transform.position;
         //Debug.Log("Position of the current Bullet" + position.y);
-            float time = Time.deltaTime*5;
+            float time = Time.deltaTime*3;
             if (rotation == 2)
             {
                 position.y -= time;
@@ -29,7 +29,7 @@ public class bullet : MonoBehaviour {
                 position.x -= time;
             }
             transform.position = position;
-            if (position.x > 9 || position.x < 0 || position.y > 0 || position.y < -9)
+            if (position.x > 19 || position.x < 0 || position.y > 0 || position.y < -19)
             {
                 Destroy(gameObject);
             }
@@ -43,12 +43,21 @@ public class bullet : MonoBehaviour {
     void OnCollisionEnter2D(Collision2D col)
     {
 
-        Debug.Log("Collision Happened with a bullet");
-        if(col.gameObject.name=="Tank" || col.gameObject.name == "wall" || col.gameObject.name == "rock")
-        {
-            //Destroy(this.gameObject);
-        }
         
+
+        if (col.gameObject.name == "coin")
+        {
+            Debug.Log("Collision Happened with a bullet and Coin");
+            //Transform bullet3 = Instantiate(bulletPrefab) as Transform;
+            //col.collider.enabled = false;
+            Physics2D.IgnoreLayerCollision(8,9);
+
+        }else
+        {
+            Destroy(this.gameObject);
+        }
+
+
 
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Tank1 : MonoBehaviour {
     volatile Player x;
+    public GameObject coin;
     public GameObject bullet;
     // Use this for initialization
     void OnCollisionEnter2D(Collision2D collision)
@@ -18,15 +19,16 @@ public class Tank1 : MonoBehaviour {
     void Update () {
         if (x != null)
         {
+            int xPosition = x.locationX;
+            int yPosition = -x.locationY;
+            Quaternion localRotation = Quaternion.Euler(0, 0, 0);
+            Vector3 d = new Vector3(xPosition, yPosition, 0);
             if (x.health > 0)
             {
-                int xPosition = x.locationX;
-                int yPosition = -x.locationY;
-                Quaternion localRotation = Quaternion.Euler(0, 0, 0); ;
-                Vector3 d = new Vector3(xPosition, yPosition, 0);
                 int bulletX = xPosition;
                 int bulletY = yPosition + 1;
                 int rotation = x.direction;
+                Vector2 c = Vector2.up;
                 //Debug.Log(rotation+""+xPosition+""+yPosition);
                 switch (rotation)
                 {
@@ -34,17 +36,20 @@ public class Tank1 : MonoBehaviour {
                         localRotation = Quaternion.Euler(0, 0, -90);
                         bulletX = xPosition + 1;
                         bulletY = yPosition;
+                        c = Vector2.right;
                         //Debug.Log("Direction changed");
                         break;
                     case 2:
                         localRotation = Quaternion.Euler(0, 0, 180);
                         bulletX = xPosition;
                         bulletY = yPosition - 1;
+                        c = Vector2.down;
                         break;
                     case 3:
                         localRotation = Quaternion.Euler(0, 0, 90);
                         bulletX = xPosition - 1;
                         bulletY = yPosition;
+                        c = Vector2.left;
                         break;
                 }
                 transform.rotation = localRotation;
@@ -52,19 +57,24 @@ public class Tank1 : MonoBehaviour {
                 Vector3 fh = new Vector3(bulletX, bulletY, 0);
                 if (x.shot == 1)
                 {
-                    if ((bulletX >= 0 && bulletX < 10) && (bulletY <= 0 && bulletY > -10))
+                    if ((bulletX >= 0 && bulletX < 20) && (bulletY <= 0 && bulletY > -20))
                     {
-
-                        GameObject bull = Instantiate(bullet, fh, localRotation) as GameObject;
-                        bull.SendMessage("setPose", rotation);
-                        //Physics.IgnoreCollision(bull.GetComponent<Collider>(),this.GetComponent<Collider>());
+                        //RaycastHit2D hit = Physics2D.Raycast(fh,c,.1f);
+                        //Debug.DrawLine(transform.position, hit.point, Color.red);
+                        //if (hit.collider == null)
+                        //{
+                            GameObject bull = Instantiate(bullet, fh, localRotation) as GameObject;
+                            bull.SendMessage("setPose", rotation);
+                        //}    
                     }
 
                 }
             }
             else
             {
-                Destroy(this.gameObject);
+                GameObject coin1 = Instantiate(coin, d, localRotation) as GameObject;
+                coin1.name = "coin";
+                DestroyImmediate(this.gameObject);
             }
         }
         this.x = null;

@@ -40,14 +40,14 @@ public class RequestSender : MonoBehaviour {
                 {
                     //Thread.Sleep(2000);
                     //Debug.Log("Join Sent");
-                    if (!message.Equals(""))
-                    {
+                    /*if (!message.Equals(""))
+                    {*/
                         var byteData = Encoding.ASCII.GetBytes(Message);
                         client.GetStream().Write(byteData, 0, byteData.Length);
                         Debug.Log(message);
-                        message = "";
                         
-                }
+                        
+                //}
                 }
                 
             }

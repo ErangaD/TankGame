@@ -50,12 +50,14 @@ public class InputTaker : MonoBehaviour {
         oThread = new Thread(takeInput);
         oThread.IsBackground = true;    
         oThread.Start();
-        var instantiatedPrefab =Instantiate(map, new Vector3( 4.5f,-4.5f,0), originalRot) as GameObject;
+        var instantiatedPrefab =Instantiate(map, new Vector3( 9.5f,-9.5f,0), originalRot) as GameObject;
         //for 20*20 9.5 and -9.5
-        instantiatedPrefab.transform.localScale = new Vector3(4.05f,4.9f,0);
+        //for 10*10 4.5 and -4.5
+        instantiatedPrefab.transform.localScale = new Vector3(8.06f,9.7f,0);
         //for 20*20 8.06 and 9.70
-        AICalculation.numbOfRows = 10;
-        AICalculation.nmbOfColumns = 10;
+        //for 10*10
+        AICalculation.numbOfRows = 20;
+        AICalculation.nmbOfColumns = 20;
         //Debug.Log("Thread started");
         this.boardSet = true;
         this.locatedTank = true;
@@ -252,7 +254,7 @@ public class InputTaker : MonoBehaviour {
                     }
                 }
                 //Debug.Log(inputStr);
-                //just = inputStr;
+                just = inputStr;
                 String[] dataArray = inputStr.Split(':');
                 String dType = dataArray[0];
 
@@ -445,8 +447,8 @@ public class InputTaker : MonoBehaviour {
         
    }
 
-    
 
+    
     System.Collections.Generic.List<Vector3> getVecotors(String data)
     {
         String[] cod = data.Split(';');
