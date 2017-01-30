@@ -50,7 +50,7 @@ public class bullet : MonoBehaviour {
             Debug.Log("Collision Happened with a bullet and Coin");
             //Transform bullet3 = Instantiate(bulletPrefab) as Transform;
             //col.collider.enabled = false;
-            Physics2D.IgnoreLayerCollision(8,9);
+            //Physics2D.IgnoreLayerCollision(8,9);
 
         }else
         {

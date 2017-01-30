@@ -14,6 +14,9 @@ public class InputTaker : MonoBehaviour {
     public GameObject enemy1;
     public GameObject rocks;
     public GameObject wall;
+    public GameObject wall10;
+    public GameObject wall2;
+    public GameObject wall3;
     public GameObject water;
     public GameObject health;
     public GameObject myTank;
@@ -53,15 +56,19 @@ public class InputTaker : MonoBehaviour {
         var instantiatedPrefab =Instantiate(map, new Vector3( 9.5f,-9.5f,0), originalRot) as GameObject;
         //for 20*20 9.5 and -9.5
         //for 10*10 4.5 and -4.5
-        instantiatedPrefab.transform.localScale = new Vector3(8.06f,9.7f,0);
+        instantiatedPrefab.transform.localScale = new Vector3(8.06f, 9.7f, 0);
         //for 20*20 8.06 and 9.70
-        //for 10*10
+        //for 10*10 4.048354 and 4.914664
+
         AICalculation.numbOfRows = 20;
         AICalculation.nmbOfColumns = 20;
+        //Changes in bullet and tank
+
         //Debug.Log("Thread started");
         this.boardSet = true;
         this.locatedTank = true;
-
+        Physics2D.IgnoreLayerCollision(8, 9);
+        Physics2D.IgnoreLayerCollision(8, 10);
     }
     void callIt()
     {
@@ -90,10 +97,22 @@ public class InputTaker : MonoBehaviour {
 
         foreach(int[] wall1 in  walldet)
         {
-            if (wall1[2] != 4)
+            Vector3 j = new Vector3(wall1[0], -wall1[1], 0);
+            if (wall1[2] == 0)
             {
-                Vector3 j = new Vector3(wall1[0], -wall1[1], 0);
                 wallsInst.Add((GameObject)Instantiate(wall, j, originalRot));
+            }
+            else if (wall1[2] == 1)
+            {
+                wallsInst.Add((GameObject)Instantiate(wall10, j, originalRot));
+            }
+            else if (wall1[2] == 2)
+            {
+                wallsInst.Add((GameObject)Instantiate(wall2, j, originalRot));
+
+            }else if (wall1[2] == 3)
+            {
+                wallsInst.Add((GameObject)Instantiate(wall3, j, originalRot));
             }
         }
 
@@ -299,7 +318,8 @@ public class InputTaker : MonoBehaviour {
                     AICalculation.changed = true;
                     callIt();
                     changeHappened = true;
-
+                    scoreUpdater.players= new List<Player>(this.players);
+                    scoreUpdater.changed = true;
 
                 }
                 else if (dType.Equals("I"))
@@ -425,8 +445,8 @@ public class InputTaker : MonoBehaviour {
         {
             GameObject cv=(GameObject)Instantiate(coins, coinList[0], originalRot);
             cv.name = "coin";
-            //coinObject.Add(cv);
-            
+            coinObject.Add(cv);
+            AICalculation.coins = new List<GameObject>(coinObject);
             Destroy(cv, coinTime[0]);
             //Debug.Log(coinObject.Count);
             coinList.RemoveAt(0);

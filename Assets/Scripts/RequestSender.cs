@@ -21,16 +21,6 @@ public class RequestSender : MonoBehaviour {
             message = value;
         }
     }
-    /*private void Update()
-    {
-
-        Thread.Sleep(1000);
-        message = "SHOOT#";
-        sendRequest();
-        Thread.Sleep(1000);
-        message = "DOWN#";
-        sendRequest();
-    }*/
 
     public static void sendRequest()
     {
